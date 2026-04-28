@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Quadrant Sports — Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E1A;
+  --bg2:#111827;
+  --bg3:#1C2433;
+  --surface:#1E2D40;
+  --border:#2A3A50;
+  --accent:#00C49A;
+  --accent2:#0077CC;
+  --warn:#F59E0B;
+  --danger:#EF4444;
+  --text:#E8F0F7;
+  --muted:#6B8BAF;
+  --card:#162030;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+.app{height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
+
+/* ── HEADER ── */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.header-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:#fff;letter-spacing:1px}
+.header-info{flex:1}
+.header-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.5px;color:var(--text)}
+.header-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.header-actions{display:flex;gap:8px}
+.hbtn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.hbtn:hover{border-color:var(--accent);color:var(--accent)}
+.hbtn.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+.stat{background:var(--bg2);padding:10px 4px;text-align:center}
+.stat-n{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.stat-l{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
+.s-green{color:var(--accent)}
+.s-amber{color:var(--warn)}
+.s-red{color:var(--danger)}
+.s-blue{color:#60A5FA}
+
+/* ── SCREENS ── */
+.screen{display:none;flex:1;overflow-y:auto;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── EMPLOYEE LIST ── */
+.list-hint{font-size:11px;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+.emp-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;background:var(--bg)}
+.emp-item:hover,.emp-item:active{background:var(--bg3)}
+.av{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;flex-shrink:0}
+.emp-meta{flex:1;min-width:0}
+.emp-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.emp-role{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-pill{font-size:10px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap;letter-spacing:0.03em}
+.pill-in{background:rgba(0,196,154,0.15);color:var(--accent);border:1px solid rgba(0,196,154,0.3)}
+.pill-out{background:rgba(245,158,11,0.15);color:var(--warn);border:1px solid rgba(245,158,11,0.3)}
+.pill-abs{background:rgba(239,68,68,0.15);color:var(--danger);border:1px solid rgba(239,68,68,0.3)}
+.pill-pend{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+
+/* ── MARK SCREEN ── */
+.mark-wrap{padding:16px;display:flex;flex-direction:column;gap:12px}
+.back-row{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:4px}
+.back-row:hover{color:var(--accent)}
+.back-arrow{font-size:18px;line-height:1}
+.emp-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
+.big-av{width:72px;height:72px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:24px;margin:0 auto 12px}
+.emp-card-name{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.5px}
+.emp-card-role{font-size:12px;color:var(--muted);margin-top:4px}
+.clock-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.clock-time{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.clock-date{font-size:11px;color:var(--muted);margin-top:4px}
+.today-log{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.log-title{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px}
+.log-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+.log-row+.log-row{border-top:1px solid var(--border)}
+.log-lbl{color:var(--muted)}
+.log-val{font-weight:500}
+
+/* ── FINGERPRINT ── */
+.fp-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.fp-modal.open{opacity:1;pointer-events:all}
+.fp-sheet{background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 24px 40px;width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+.fp-modal.open .fp-sheet{transform:translateY(0)}
+.fp-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.fp-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px}
+.fp-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:24px}
+.fp-icon-wrap{width:90px;height:90px;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+.fp-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--border);transition:all 0.3s}
+.fp-icon-wrap.scanning .fp-ring{border-color:var(--accent);box-shadow:0 0 0 8px rgba(0,196,154,0.12),0 0 0 16px rgba(0,196,154,0.06);animation:pulse 1.2s infinite}
+.fp-icon-wrap.success .fp-ring{border-color:var(--accent);background:rgba(0,196,154,0.1)}
+.fp-icon-wrap.fail .fp-ring{border-color:var(--danger);animation:shake 0.4s}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(0,196,154,0.2)}50%{box-shadow:0 0 0 12px rgba(0,196,154,0.08)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.fp-svg{width:44px;height:44px}
+.fp-status{font-size:13px;color:var(--muted);text-align:center;min-height:20px}
+.fp-status.ok{color:var(--accent)}
+.fp-status.err{color:var(--danger)}
+.fp-skip{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;cursor:pointer;text-decoration:underline}
+.fp-skip:hover{color:var(--text)}
+
+/* ── ACTION BUTTONS ── */
+.action-btns{display:grid;gap:10px}
+.action-btns.two{grid-template-columns:1fr 1fr}
+.abtn{border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.abtn:active{transform:scale(0.97)}
+.abtn-in{background:rgba(0,196,154,0.2);color:var(--accent);border:1px solid rgba(0,196,154,0.4)}
+.abtn-out{background:rgba(245,158,11,0.2);color:var(--warn);border:1px solid rgba(245,158,11,0.4)}
+.abtn-abs{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.25);grid-column:1/-1}
+.abtn-done{background:var(--bg3);color:var(--muted);border:1px solid var(--border);grid-column:1/-1;cursor:default}
+
+/* ── REPORT SCREEN ── */
+.report-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.rtab{flex:1;padding:12px;font-size:12px;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+.rtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.report-body{padding:12px;flex:1;overflow-y:auto}
+table.rt{width:100%;border-collapse:collapse;font-size:11px}
+table.rt th{background:var(--bg3);color:var(--muted);padding:8px 6px;text-align:center;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border)}
+table.rt th:first-child{text-align:left}
+table.rt td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:center;color:var(--text)}
+table.rt td:first-child{text-align:left;font-weight:500}
+table.rt tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+.rt-green{color:var(--accent);font-weight:600}
+.rt-red{color:var(--danger)}
+.rt-amber{color:var(--warn)}
+.report-title{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--text);padding:8px 0 12px;letter-spacing:0.5px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#000;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:500;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:200;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-logo">QS</div>
+    <div class="header-info">
+      <div class="header-title">QUADRANT SPORTS</div>
+      <div class="header-sub" id="headerDate"></div>
+    </div>
+    <div class="header-actions">
+      <button class="hbtn" onclick="showReport()">Report</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-n s-green" id="cIn">0</div><div class="stat-l">Present</div></div>
+    <div class="stat"><div class="stat-n s-amber" id="cOut">0</div><div class="stat-l">Out</div></div>
+    <div class="stat"><div class="stat-n s-red" id="cAbs">0</div><div class="stat-l">Absent</div></div>
+    <div class="stat"><div class="stat-n s-blue" id="cPend">16</div><div class="stat-l">Pending</div></div>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div id="homeScreen" class="screen active">
+    <div class="list-hint">Tap your name — verify fingerprint — mark attendance</div>
+    <div id="empList"></div>
+  </div>
+
+  <!-- MARK SCREEN -->
+  <div id="markScreen" class="screen">
+    <div class="mark-wrap">
+      <div class="back-row" onclick="goHome()"><span class="back-arrow">&#8592;</span> Back</div>
+      <div class="emp-card">
+        <div class="big-av" id="bigAv"></div>
+        <div class="emp-card-name" id="mName"></div>
+        <div class="emp-card-role" id="mRole"></div>
+      </div>
+      <div class="clock-box">
+        <div class="clock-time" id="clockTime">--:--:--</div>
+        <div class="clock-date" id="clockDate"></div>
+      </div>
+      <div class="today-log" id="todayLog"></div>
+      <div class="action-btns" id="actionBtns"></div>
+    </div>
+  </div>
+
+  <!-- REPORT SCREEN -->
+  <div id="reportScreen" class="screen">
+    <div class="mark-wrap" style="padding-bottom:8px">
+      <div class="back-row" onclick="goHome()"><span class="back-arrow">&#8592;</span> Back</div>
+    </div>
+    <div class="report-tabs">
+      <div class="rtab active" onclick="switchTab(0)">Today's Log</div>
+      <div class="rtab" onclick="switchTab(1)">Monthly Summary</div>
+    </div>
+    <div class="report-body" id="reportBody"></div>
+  </div>
+</div>
+
+<!-- FINGERPRINT MODAL -->
+<div class="fp-modal" id="fpModal">
+  <div class="fp-sheet">
+    <div class="fp-handle"></div>
+    <div class="fp-title">Identity Verification</div>
+    <div class="fp-sub" id="fpSub">Place your finger on the sensor</div>
+    <div class="fp-icon-wrap" id="fpIcon" onclick="startFP()">
+      <div class="fp-ring"></div>
+      <svg class="fp-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 4C12.06 4 4 12.06 4 22" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 4C31.94 4 40 12.06 40 22" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 10C15.37 10 10 15.37 10 22" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 10C28.63 10 34 15.37 34 22" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 16C18.69 16 16 18.69 16 22C16 25.31 18.69 28 22 28" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 16C25.31 16 28 18.69 28 22C28 28 22 34 22 34" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M16 22C16 28 19 36 22 40" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M10 22C10 32 14 38 18 42" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M4 22C4 34 10 42 16 46" stroke="#6B8BAF" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="22" r="2" fill="#6B8BAF"/>
+      </svg>
+    </div>
+    <div class="fp-status" id="fpStatus">Tap the fingerprint to scan</div>
+    <div class="fp-skip" id="fpSkip" onclick="skipFP()">Skip — use without fingerprint</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const EMPLOYEES=[
+  {id:1,name:'Raghvendra Rajak',role:'Factory Helper',dept:'Production'},
+  {id:2,name:'Rohit Lodhi',role:'Sales/Purchase Executive',dept:'Sales'},
+  {id:3,name:'Rajnesh Chaturvedi',role:'Factory Supervisor',dept:'Production'},
+  {id:4,name:'Ketan Salaiya',role:'Helper',dept:'Production'},
+  {id:5,name:'Rameshwar Lodhi',role:'Helper',dept:'Production'},
+  {id:6,name:'Ammu Padhajhir',role:'Welder',dept:'Production'},
+  {id:7,name:'Yadav Tulsipar',role:'Helper',dept:'Production'},
+  {id:8,name:'(?) Tulsipar',role:'Helper',dept:'Production'},
+  {id:9,name:'Sagir',role:'Welder / Engineer',dept:'Production'},
+  {id:10,name:'Sameer',role:'Helper',dept:'SS Dept'},
+  {id:11,name:'Jeeshan',role:'Helper',dept:'SS Polish'},
+  {id:12,name:'Dayaram',role:'SS Operator',dept:'SS Dept'},
+  {id:13,name:'Avnish Verma',role:'Laser Cutting Operator',dept:'Laser Cutting'},
+  {id:14,name:'Abhishek',role:'Laser Operator',dept:'Laser Cutting'},
+  {id:15,name:'Abhishek (SS)',role:'Helper',dept:'SS Dept'},
+  {id:16,name:'Abhishek SS Brother',role:'Helper',dept:'SS Dept'}
+];
+
+const COLORS=['#00C49A','#60A5FA','#F59E0B','#EF4444','#A78BFA','#34D399','#FB923C','#38BDF8','#F472B6','#4ADE80','#FBBF24','#818CF8','#2DD4BF','#E879F9','#FB7185','#A3E635'];
+
+let attendance={};
+let currentId=null;
+let clockTick=null;
+let fpSupported=false;
+let activeTab=0;
+
+function todayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+function fmt12(d){return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});}
+function fmtDate(d){return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+function initials(n){return n.replace(/[()]/g,'').trim().split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function col(id){return COLORS[(id-1)%COLORS.length];}
+function rec(id){const k=todayKey();if(!attendance[k])attendance[k]={};return attendance[k][id]||{in:null,out:null,status:'pending'};}
+function setRec(id,r){const k=todayKey();if(!attendance[k])attendance[k]={};attendance[k][id]=r;save();}
+function save(){try{localStorage.setItem('qs_att',JSON.stringify(attendance));}catch(e){}}
+function load(){try{const d=localStorage.getItem('qs_att');if(d)attendance=JSON.parse(d);}catch(e){}}
+
+function empStatus(id){
+  const r=rec(id);
+  if(r.status==='absent') return 'absent';
+  if(r.in&&r.out) return 'full';
+  if(r.in) return 'in';
+  return 'pending';
+}
+
+async function checkFPSupport(){
+  if(window.PublicKeyCredential){
+    try{fpSupported=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();}catch(e){fpSupported=false;}
+  }
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome(){
+  if(clockTick){clearInterval(clockTick);clockTick=null;}
+  currentId=null;
+  showScreen('homeScreen');
+  renderHome();
+}
+
+function renderHome(){
+  const now=new Date();
+  document.getElementById('headerDate').textContent=fmtDate(now);
+  let inC=0,outC=0,absC=0,pendC=0;
+  let html='';
+  EMPLOYEES.forEach(emp=>{
+    const st=empStatus(emp.id);
+    const r=rec(emp.id);
+    if(st==='full'){outC++;}
+    else if(st==='in'){inC++;}
+    else if(st==='absent'){absC++;}
+    else{pendC++;}
+    let pill='';
+    if(st==='in') pill=`<span class="status-pill pill-in">IN ${fmt12(new Date(r.in))}</span>`;
+    else if(st==='full') pill=`<span class="status-pill pill-out">DONE ${fmt12(new Date(r.out))}</span>`;
+    else if(st==='absent') pill=`<span class="status-pill pill-abs">Absent</span>`;
+    else pill=`<span class="status-pill pill-pend">Pending</span>`;
+    const c=col(emp.id);
+    html+=`<div class="emp-item" onclick="openEmp(${emp.id})">
+      <div class="av" style="background:${c}22;color:${c}">${initials(emp.name)}</div>
+      <div class="emp-meta">
+        <div class="emp-name">${emp.name}</div>
+        <div class="emp-role">${emp.role} · ${emp.dept}</div>
+      </div>
+      ${pill}
+    </div>`;
+  });
+  document.getElementById('empList').innerHTML=html;
+  document.getElementById('cIn').textContent=inC;
+  document.getElementById('cOut').textContent=outC;
+  document.getElementById('cAbs').textContent=absC;
+  document.getElementById('cPend').textContent=pendC;
+}
+
+function openEmp(id){
+  currentId=id;
+  const emp=EMPLOYEES.find(e=>e.id===id);
+  const c=col(id);
+  document.getElementById('bigAv').style.background=c+'22';
+  document.getElementById('bigAv').style.color=c;
+  document.getElementById('bigAv').textContent=initials(emp.name);
+  document.getElementById('mName').textContent=emp.name;
+  document.getElementById('mRole').textContent=emp.role+' · '+emp.dept;
+  showScreen('markScreen');
+  startClock();
+  renderMarkLog(id);
+  openFP(id);
+}
+
+function startClock(){
+  function tick(){
+    const n=new Date();
+    document.getElementById('clockTime').textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+    document.getElementById('clockDate').textContent=fmtDate(n);
+  }
+  tick();
+  clockTick=setInterval(tick,1000);
+}
+
+function renderMarkLog(id){
+  const r=rec(id);
+  let html='<div class="log-title">Today\'s Record</div>';
+  if(r.in) html+=`<div class="log-row"><span class="log-lbl">Morning IN</span><span class="log-val" style="color:var(--accent)">${fmt12(new Date(r.in))}</span></div>`;
+  if(r.out) html+=`<div class="log-row"><span class="log-lbl">Evening OUT</span><span class="log-val" style="color:var(--warn)">${fmt12(new Date(r.out))}</span></div>`;
+  if(r.status==='absent') html+=`<div class="log-row"><span class="log-lbl">Status</span><span class="log-val" style="color:var(--danger)">Marked Absent</span></div>`;
+  if(!r.in && r.status!=='absent') html+=`<div class="log-row" style="justify-content:center;color:var(--muted);font-size:12px">No record yet today</div>`;
+  document.getElementById('todayLog').innerHTML=html;
+
+  const st=empStatus(id);
+  let btns='';
+  if(st==='absent'){
+    btns=`<button class="abtn abtn-done">Marked Absent Today</button>`;
+  } else if(st==='full'){
+    btns=`<button class="abtn abtn-done">Full Day Attendance Recorded</button>`;
+  } else if(st==='in'){
+    btns=`<div class="action-btns"><button class="abtn abtn-out" onclick="triggerMark('out')">Mark Evening OUT</button></div>`;
+    document.getElementById('actionBtns').innerHTML=btns;return;
+  } else {
+    btns=`<div class="action-btns two"><button class="abtn abtn-in" onclick="triggerMark('in')">Mark IN</button><button class="abtn abtn-abs" onclick="triggerMark('absent')">Mark Absent</button></div>`;
+    document.getElementById('actionBtns').innerHTML=btns;return;
+  }
+  document.getElementById('actionBtns').innerHTML=btns;
+}
+
+function triggerMark(type){
+  if(fpSupported){
+    openFP(currentId,type);
+  } else {
+    doMark(currentId,type);
+  }
+}
+
+let pendingMarkType=null;
+
+function openFP(id,markType){
+  pendingMarkType=markType||null;
+  const modal=document.getElementById('fpModal');
+  const icon=document.getElementById('fpIcon');
+  const status=document.getElementById('fpStatus');
+  const sub=document.getElementById('fpSub');
+  icon.className='fp-icon-wrap';
+  status.textContent='Tap the fingerprint icon to scan';
+  status.className='fp-status';
+  if(fpSupported){
+    sub.textContent='Use your registered fingerprint to verify';
+    document.getElementById('fpSkip').style.display='block';
+  } else {
+    sub.textContent='Fingerprint not available on this device — tap to continue';
+    document.getElementById('fpSkip').style.display='none';
+  }
+  modal.classList.add('open');
+}
+
+async function startFP(){
+  const icon=document.getElementById('fpIcon');
+  const status=document.getElementById('fpStatus');
+  icon.className='fp-icon-wrap scanning';
+  status.textContent='Scanning...';
+  status.className='fp-status';
+
+  if(fpSupported){
+    try{
+      const credential=await navigator.credentials.get({
+        publicKey:{
+          challenge:crypto.getRandomValues(new Uint8Array(32)),
+          timeout:30000,
+          userVerification:'required',
+          rpId:location.hostname||'localhost'
+        }
+      });
+      icon.className='fp-icon-wrap success';
+      status.textContent='Verified!';
+      status.className='fp-status ok';
+      setTimeout(()=>{closeFP();if(pendingMarkType)doMark(currentId,pendingMarkType);},800);
+    } catch(e){
+      if(e.name==='NotAllowedError'){
+        icon.className='fp-icon-wrap fail';
+        status.textContent='Verification failed or cancelled';
+        status.className='fp-status err';
+        setTimeout(()=>{icon.className='fp-icon-wrap';status.textContent='Tap to try again';status.className='fp-status';},1500);
+      } else {
+        skipFP();
+      }
+    }
+  } else {
+    setTimeout(()=>{
+      icon.className='fp-icon-wrap success';
+      status.textContent='Proceeding...';
+      status.className='fp-status ok';
+      setTimeout(()=>{closeFP();if(pendingMarkType)doMark(currentId,pendingMarkType);},600);
+    },600);
+  }
+}
+
+function skipFP(){
+  closeFP();
+  if(pendingMarkType) doMark(currentId,pendingMarkType);
+}
+
+function closeFP(){
+  document.getElementById('fpModal').classList.remove('open');
+  pendingMarkType=null;
+}
+
+function doMark(id,type){
+  const r=rec(id);
+  const now=new Date().toISOString();
+  if(type==='in'){r.in=now;r.status='present';}
+  else if(type==='out'){r.out=now;}
+  else if(type==='absent'){r.in=null;r.out=null;r.status='absent';}
+  setRec(id,r);
+  const msgs={in:'Morning IN marked',out:'Evening OUT marked',absent:'Marked as Absent'};
+  showToast(msgs[type]);
+  renderMarkLog(id);
+  renderHome();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function showReport(){
+  showScreen('reportScreen');
+  renderReport();
+}
+
+function switchTab(i){
+  activeTab=i;
+  document.querySelectorAll('.rtab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  renderReport();
+}
+
+function renderReport(){
+  const k=todayKey();
+  const d=new Date();
+  const monthName=d.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  let html='';
+  if(activeTab===0){
+    html=`<div class="report-title">Today — ${fmtDate(d)}</div>
+    <table class="rt">
+      <tr><th>Name</th><th>IN</th><th>OUT</th><th>Status</th></tr>`;
+    EMPLOYEES.forEach(emp=>{
+      const r=rec(emp.id);
+      const inT=r.in?fmt12(new Date(r.in)):'-';
+      const outT=r.out?fmt12(new Date(r.out)):'-';
+      const st=empStatus(emp.id);
+      let stHtml='<span style="color:var(--muted)">Pending</span>';
+      if(st==='full') stHtml='<span class="rt-green">Full Day</span>';
+      else if(st==='in') stHtml='<span class="rt-amber">In</span>';
+      else if(st==='absent') stHtml='<span class="rt-red">Absent</span>';
+      html+=`<tr><td>${emp.name.split(' ')[0]}</td><td>${inT}</td><td>${outT}</td><td>${stHtml}</td></tr>`;
+    });
+    html+='</table>';
+  } else {
+    html=`<div class="report-title">${monthName}</div>
+    <table class="rt">
+      <tr><th>Name</th><th>Present</th><th>Absent</th><th>Pending</th></tr>`;
+    EMPLOYEES.forEach(emp=>{
+      let pres=0,abs=0,pend=0;
+      Object.keys(attendance).forEach(dayKey=>{
+        const dr=attendance[dayKey][emp.id];
+        if(!dr||dr.status==='pending') pend++;
+        else if(dr.status==='absent') abs++;
+        else pres++;
+      });
+      html+=`<tr><td>${emp.name.split(' ')[0]}</td><td class="rt-green">${pres}</td><td class="rt-red">${abs}</td><td style="color:var(--muted)">${pend}</td></tr>`;
+    });
+    html+='</table><div style="font-size:10px;color:var(--muted);margin-top:10px;text-align:center">Data builds up as daily attendance is marked</div>';
+  }
+  document.getElementById('reportBody').innerHTML=html;
+}
+
+load();
+checkFPSupport();
+renderHome();
+setInterval(()=>{
+  const d=new Date();
+  document.getElementById('headerDate').textContent=fmtDate(d);
+},60000);
+</script>
+</body>
+</html>
